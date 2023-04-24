@@ -1,0 +1,54 @@
+{
+  "ts": {
+    "$resolver": "timestamp",
+    "epoch": {
+      "unit": "millis",
+      "rounded": true
+    }
+  },
+  "pid": {
+    "$resolver": "mdc",
+    "key": "pid"
+  },
+  "sessionId": {
+    "$resolver": "mdc",
+    "key": "sessionId"
+  },
+  "validation": {
+    "$resolver": "mdc",
+    "key": "validation"
+  },
+  "msg": {
+    "$resolver": "message",
+    "stringified": true
+  },
+  "stackTrace": {
+    "$resolver": "exception",
+    "field": "stackTrace",
+    "stackTrace": {
+      "stringified": true
+    }
+  },
+  "loggerName": {
+    "$resolver": "logger",
+    "field": "name"
+  },
+  "level": {
+    "$resolver": "level",
+    "field": "name"
+  },
+  "endOfBatch": {
+    "$resolver": "endOfBatch"
+  },
+  "timestamp": {
+    "$resolver": "timestamp",
+    "pattern": {
+      "format": "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+      "timeZone": "UTC",
+      "locale": "en_US"
+    }
+  },
+  "message": {
+    "$resolver": "message"
+  }
+}
