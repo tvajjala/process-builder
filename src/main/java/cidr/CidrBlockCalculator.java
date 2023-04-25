@@ -1,28 +1,33 @@
 package cidr;
 
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.Iterator;
 
 /**
  * https://mxtoolbox.com/subnetcalculator.aspx
  */
+@Slf4j
 public class CidrBlockCalculator {
 
 
     public static void main(String[] args) {
 
-        SubnetCidrBlock subnetCidrBlock = SubnetCidrBlock.builder(Protocol.IPV4)
+        SfcpSubnet sfcpSubnet = SfcpSubnet.builder(SfcpSubnet.Protocol.IPV4)
                 .fromMasterBlock("10.0.128.0/17")//<-- vcnSubnet
-                .withSubnetMask(24)
+                .withSubnetMask(SfcpSubnet.Mask._24)
                 .build();
-        Iterator<String> iterator = subnetCidrBlock.getSubnetCidrBlocks();
+
+        Iterator<String> iterator = sfcpSubnet.getSubnetCidrBlocks();
+
         while (iterator.hasNext()) {
-            System.out.println(iterator.next());
+            log.info(iterator.next());
         }
 
 
-        System.out.println(subnetCidrBlock.getTotalIPs());
-        System.out.println(subnetCidrBlock.getTotalUsableIPs());
+        System.out.println(sfcpSubnet.getTotalIPs());
+        System.out.println(sfcpSubnet.getTotalUsableIPs());
 
 
       /*  cidrBlock.getCIDRBlockWithFullIPList().entrySet().forEach(stringListEntry -> {

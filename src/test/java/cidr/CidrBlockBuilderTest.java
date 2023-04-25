@@ -14,13 +14,13 @@ public class CidrBlockBuilderTest {
     void subnetBlockWithMask24Test() {
 
         //given:
-        SubnetCidrBlock subnetCidrBlock = SubnetCidrBlock.builder(Protocol.IPV4)
+        SfcpSubnet sfcpSubnet = SfcpSubnet.builder(SfcpSubnet.Protocol.IPV4)
                 .fromMasterBlock("10.0.128.0/17")//<-- vcnSubnet
-                .withSubnetMask(24)
+                .withSubnetMask(SfcpSubnet.Mask._24)
                 .build();
 
         //when:
-        Iterator<String> iterator = subnetCidrBlock.getSubnetCidrBlocks();
+        Iterator<String> iterator = sfcpSubnet.getSubnetCidrBlocks();
 
         //then: with 256 IP blocks
         Assertions.assertTrue(iterator.hasNext());
@@ -36,26 +36,40 @@ public class CidrBlockBuilderTest {
 
 
     @Test
-    void subnetBlockWithMask25Test() {
+    void subnetBlockWithMask28Test() {
 
         //given: scenario
-        SubnetCidrBlock subnetCidrBlock = SubnetCidrBlock.builder(Protocol.IPV4)
+        SfcpSubnet sfcpSubnet = SfcpSubnet.builder(SfcpSubnet.Protocol.IPV4)
                 .fromMasterBlock("10.0.128.0/17")//<-- vcnSubnet
-                .withSubnetMask(25)// any range between 24-28
+                .withSubnetMask(SfcpSubnet.Mask._28)
                 .build();
 
         //when: invoke build cidr block
-        Iterator<String> iterator = subnetCidrBlock.getSubnetCidrBlocks();
+        Iterator<String> iterator = sfcpSubnet.getSubnetCidrBlocks();
 
         //then: expect 128 IP slots
         Assertions.assertTrue(iterator.hasNext());
-        Assertions.assertEquals("10.0.128.0/25", iterator.next());
+        Assertions.assertEquals("10.0.128.0/28", iterator.next());
 
         Assertions.assertTrue(iterator.hasNext());
-        Assertions.assertEquals("10.0.128.128/25", iterator.next());
+        Assertions.assertEquals("10.0.128.16/28", iterator.next());
 
         Assertions.assertTrue(iterator.hasNext());
-        Assertions.assertEquals("10.0.129.0/25", iterator.next());
+        Assertions.assertEquals("10.0.128.32/28", iterator.next());
+
+    }
+
+    @Test
+    void foundOverlappingAddressTest() {
+        SfcpSubnet sfcpSubnet = SfcpSubnet.builder(SfcpSubnet.Protocol.IPV4)
+                .fromMasterBlock("10.0.128.0/17")//<-- vcnSubnet
+                .withSubnetMask(SfcpSubnet.Mask._28)
+                .build();
+
+        //given: overlapping address [10.0.128.30, 10.0.128.31]
+        boolean flag = sfcpSubnet.hasAnyOverlappingAddress("10.0.128.30/27", "10.0.128.0/27");
+
+        Assertions.assertTrue(flag);
 
     }
 }

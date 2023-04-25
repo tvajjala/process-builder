@@ -1,6 +1,7 @@
 package cidr;
 
 import io.vavr.collection.Stream;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Iterator;
 import java.util.List;
@@ -23,7 +24,8 @@ import static java.util.stream.Collectors.toList;
  *
  * @author tvajjala
  */
-public class SubnetCidrBlock {
+@Slf4j
+public class SfcpSubnet {
 
     /**
      * IPv4 uses 32-bit IP address
@@ -50,7 +52,7 @@ public class SubnetCidrBlock {
      * @param masterBlockMask masterBlockMask
      * @param subnetMask      subnetMask
      */
-    private SubnetCidrBlock(String masterBlockIPV4, Integer masterBlockMask, Integer subnetMask) {
+    private SfcpSubnet(String masterBlockIPV4, Integer masterBlockMask, Integer subnetMask) {
         this.masterBlockIPV4 = masterBlockIPV4;
         this.masterBlockMask = masterBlockMask;
         this.subnetMask = subnetMask;
@@ -64,6 +66,17 @@ public class SubnetCidrBlock {
      */
     private static final int MAX = ((int) Math.pow(2, 8) - 1);
 
+    public boolean hasAnyOverlappingAddress(List<String> existingCidrList, String cidrToBeCreated) {
+        return existingCidrList.stream().anyMatch(existing -> hasAnyOverlappingAddress(existing, cidrToBeCreated));
+    }
+
+    public boolean hasAnyOverlappingAddress(String existingCidr, String cidrToBeCreated) {
+        List<String> m1List = getIPList(existingCidr);
+        List<String> m2List = getIPList(cidrToBeCreated);
+        m2List.retainAll(m1List);// retains common elements in m2
+        log.info("Found overlapping {}", m2List);
+        return !m2List.isEmpty();
+    }
 
     public Iterator<String> getSubnetCidrBlocks() {
         return new CIDRBlockHolder(masterBlockIPV4, subnetMask);
@@ -112,9 +125,9 @@ public class SubnetCidrBlock {
             }
             hasNextInvoked = false;
             String subnet = String.format("%d.%d.%d.%d/%d", b0, b1, b2, b3, subnetMask);
-            System.out.println("Initial IP " + String.format("%d.%d.%d.%d", b0, b1, b2, b3));
-            System.out.println("Total IPs " + ipCount(subnetMask));
-            System.out.println("Full " + getIPList(String.format("%d.%d.%d.%d", b0, b1, b2, b3), subnetMask));
+            log.info("Initial IP " + String.format("%d.%d.%d.%d", b0, b1, b2, b3));
+            log.info("Total IPs " + ipCount(subnetMask));
+            log.info("Full IPList " + getIPList(String.format("%d.%d.%d.%d", b0, b1, b2, b3), subnetMask));
             return subnet;
         }
 
@@ -147,6 +160,13 @@ public class SubnetCidrBlock {
         return getIPList(masterBlockIPV4, masterBlockMask);
     }
 
+    /**
+     * Returns list of all IPs
+     *
+     * @param initialIP  x.x.x.x
+     * @param subnetMask y
+     * @return list of all IPs
+     */
     private List<String> getIPList(String initialIP, int subnetMask) {
         final int[] bytes = stream(initialIP.split("\\.")).mapToInt(Integer::parseInt).toArray();
         int b3 = bytes[3];
@@ -157,6 +177,19 @@ public class SubnetCidrBlock {
                 .collect(toList());
     }
 
+    /**
+     * Returns list of all IPs
+     *
+     * @param subnetWithMask x.x.x.x/y
+     * @return list of IPs
+     */
+    private List<String> getIPList(String subnetWithMask) {
+        int m1Index = subnetWithMask.indexOf("/");
+        String initialIP = subnetWithMask.substring(0, m1Index);
+
+        int m1Mask = Integer.parseInt(subnetWithMask.substring(m1Index + 1));
+        return getIPList(initialIP, m1Mask);
+    }
 
     /**
      * IP Count for the given mask
@@ -210,16 +243,12 @@ public class SubnetCidrBlock {
             return this;
         }
 
-        Builder withSubnetMask(Integer subnetMask) {
-            if (24 < subnetMask && subnetMask > 28) {
-                //Restrict CIDR Blocks to 256, 128, 64, 32,16
-                throw new IllegalArgumentException("Only supports 24-28 range");
-            }
-            this.subnetMask = subnetMask;
+        Builder withSubnetMask(Mask subnetMask) {
+            this.subnetMask = subnetMask.getValue();
             return this;
         }
 
-        public SubnetCidrBlock build() {
+        public SfcpSubnet build() {
             int slashIndex = masterBlock.indexOf("/");
             String masterBlockIPv4 = masterBlock.substring(0, slashIndex);
             Integer masterBlockMask = Integer.parseInt(masterBlock.substring(slashIndex + 1));
@@ -232,7 +261,7 @@ public class SubnetCidrBlock {
                 throw new IllegalArgumentException("Invalid subnetMask value provided");
             }
 
-            return new SubnetCidrBlock(masterBlockIPv4, masterBlockMask, subnetMask);
+            return new SfcpSubnet(masterBlockIPv4, masterBlockMask, subnetMask);
         }
 
         private boolean isValidIPV4(String ipv4) {
@@ -244,19 +273,46 @@ public class SubnetCidrBlock {
         }
 
     }
-}
 
-enum Protocol {
+    enum Protocol {
 
-    /**
-     * Only Supports IPV4
-     */
-    IPV4;
+        /**
+         * Only Supports IPV4
+         */
+        IPV4;
 
-    // IPV6;//FIXME: Doesn't support
-    
-    public boolean isIPv4() {
-        return this == IPV4;
+        // IPV6;//FIXME: Doesn't support
+
+        public boolean isIPv4() {
+            return this == IPV4;
+        }
+
     }
 
+    enum Mask {
+
+        _24(24, 256),
+        _25(25, 128),
+        _26(26, 64),
+        _27(27, 32),
+        _28(28, 16);
+
+        private int mask;
+
+        private int ipRange;
+
+        Mask(int mask, int ipRange) {
+            this.mask = mask;
+            this.ipRange = ipRange;
+        }
+
+        int getValue() {
+            return mask;
+        }
+
+        int getIpRange() {
+            return ipRange;
+        }
+
+    }
 }
