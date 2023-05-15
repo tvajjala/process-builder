@@ -14,9 +14,9 @@ public class CidrBlockCalculator {
 
     public static void main(String[] args) {
 
-        SfcpSubnet sfcpSubnet = SfcpSubnet.builder(SfcpSubnet.Protocol.IPV4)
+        NetworkSubnet sfcpSubnet = NetworkSubnet.builder(NetworkSubnet.Protocol.IPV4)
                 .fromMasterBlock("10.0.128.0/17")//<-- vcnSubnet
-                .withSubnetMask(SfcpSubnet.Mask._24)
+                .withSubnetMask(NetworkSubnet.Mask._24)
                 .build();
 
         Iterator<String> iterator = sfcpSubnet.getSubnetCidrBlocks();

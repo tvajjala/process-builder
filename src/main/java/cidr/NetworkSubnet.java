@@ -25,7 +25,7 @@ import static java.util.stream.Collectors.toList;
  * @author tvajjala
  */
 @Slf4j
-public class SfcpSubnet {
+public class NetworkSubnet {
 
     /**
      * IPv4 uses 32-bit IP address
@@ -52,7 +52,7 @@ public class SfcpSubnet {
      * @param masterBlockMask masterBlockMask
      * @param subnetMask      subnetMask
      */
-    private SfcpSubnet(String masterBlockIPV4, Integer masterBlockMask, Integer subnetMask) {
+    private NetworkSubnet(String masterBlockIPV4, Integer masterBlockMask, Integer subnetMask) {
         this.masterBlockIPV4 = masterBlockIPV4;
         this.masterBlockMask = masterBlockMask;
         this.subnetMask = subnetMask;
@@ -248,7 +248,7 @@ public class SfcpSubnet {
             return this;
         }
 
-        public SfcpSubnet build() {
+        public NetworkSubnet build() {
             int slashIndex = masterBlock.indexOf("/");
             String masterBlockIPv4 = masterBlock.substring(0, slashIndex);
             Integer masterBlockMask = Integer.parseInt(masterBlock.substring(slashIndex + 1));
@@ -261,7 +261,7 @@ public class SfcpSubnet {
                 throw new IllegalArgumentException("Invalid subnetMask value provided");
             }
 
-            return new SfcpSubnet(masterBlockIPv4, masterBlockMask, subnetMask);
+            return new NetworkSubnet(masterBlockIPv4, masterBlockMask, subnetMask);
         }
 
         private boolean isValidIPV4(String ipv4) {

@@ -20,13 +20,13 @@ public class CidrBlockBuilderTest {
     void subnetBlockWithMask24Test() {
 
         //given:
-        SubnetCidrBlock sfcpSubnet = SubnetCidrBlock.builder(Protocol.IPV4)
+        SubnetCidrBlock networkSubnet = SubnetCidrBlock.builder(Protocol.IPV4)
                 .fromMasterBlock("10.0.128.0/17")//<-- vcnSubnet
                 .withSubnetMask(24)
                 .build();
 
         //when:
-        Iterator<String> iterator = sfcpSubnet.getSubnetCidrBlocks();
+        Iterator<String> iterator = networkSubnet.getSubnetCidrBlocks();
 
         //then: with 256 IP blocks
         Assertions.assertTrue(iterator.hasNext());
@@ -45,13 +45,13 @@ public class CidrBlockBuilderTest {
     void subnetBlockWithMask25Test() {
 
         //given: scenario
-        SubnetCidrBlock sfcpSubnet = SubnetCidrBlock.builder(Protocol.IPV4)
+        SubnetCidrBlock networkSubnet = SubnetCidrBlock.builder(Protocol.IPV4)
                 .fromMasterBlock("10.0.128.0/17")//<-- vcnSubnet
                 .withSubnetMask(25)// any range between 24-28
                 .build();
 
         //when: invoke build cidr block
-        Iterator<String> iterator = sfcpSubnet.getSubnetCidrBlocks();
+        Iterator<String> iterator = networkSubnet.getSubnetCidrBlocks();
 
         //then: expect 128 IP slots
         Assertions.assertTrue(iterator.hasNext());

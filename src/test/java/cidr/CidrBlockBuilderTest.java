@@ -14,13 +14,13 @@ public class CidrBlockBuilderTest {
     void subnetBlockWithMask24Test() {
 
         //given:
-        SfcpSubnet sfcpSubnet = SfcpSubnet.builder(SfcpSubnet.Protocol.IPV4)
+        NetworkSubnet networkSubnet = NetworkSubnet.builder(NetworkSubnet.Protocol.IPV4)
                 .fromMasterBlock("10.0.128.0/17")//<-- vcnSubnet
-                .withSubnetMask(SfcpSubnet.Mask._24)
+                .withSubnetMask(NetworkSubnet.Mask._24)
                 .build();
 
         //when:
-        Iterator<String> iterator = sfcpSubnet.getSubnetCidrBlocks();
+        Iterator<String> iterator = networkSubnet.getSubnetCidrBlocks();
 
         //then: with 256 IP blocks
         Assertions.assertTrue(iterator.hasNext());
@@ -39,13 +39,13 @@ public class CidrBlockBuilderTest {
     void subnetBlockWithMask28Test() {
 
         //given: scenario
-        SfcpSubnet sfcpSubnet = SfcpSubnet.builder(SfcpSubnet.Protocol.IPV4)
+        NetworkSubnet networkSubnet = NetworkSubnet.builder(NetworkSubnet.Protocol.IPV4)
                 .fromMasterBlock("10.0.128.0/17")//<-- vcnSubnet
-                .withSubnetMask(SfcpSubnet.Mask._28)
+                .withSubnetMask(NetworkSubnet.Mask._28)
                 .build();
 
         //when: invoke build cidr block
-        Iterator<String> iterator = sfcpSubnet.getSubnetCidrBlocks();
+        Iterator<String> iterator = networkSubnet.getSubnetCidrBlocks();
 
         //then: expect 128 IP slots
         Assertions.assertTrue(iterator.hasNext());
@@ -61,13 +61,13 @@ public class CidrBlockBuilderTest {
 
     @Test
     void foundOverlappingAddressTest() {
-        SfcpSubnet sfcpSubnet = SfcpSubnet.builder(SfcpSubnet.Protocol.IPV4)
+        NetworkSubnet networkSubnet = NetworkSubnet.builder(NetworkSubnet.Protocol.IPV4)
                 .fromMasterBlock("10.0.128.0/17")//<-- vcnSubnet
-                .withSubnetMask(SfcpSubnet.Mask._28)
+                .withSubnetMask(NetworkSubnet.Mask._28)
                 .build();
 
         //given: overlapping address [10.0.128.30, 10.0.128.31]
-        boolean flag = sfcpSubnet.hasAnyOverlappingAddress("10.0.128.30/27", "10.0.128.0/27");
+        boolean flag = networkSubnet.hasAnyOverlappingAddress("10.0.128.30/27", "10.0.128.0/27");
 
         Assertions.assertTrue(flag);
 
