@@ -9,7 +9,8 @@ import org.apache.logging.log4j.core.appender.AbstractOutputStreamAppender;
 import org.apache.logging.log4j.core.appender.RollingFileAppender;
 import util.AppUtil;
 
-import java.util.stream.IntStream;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Slf4j
 public class LogEvents {
@@ -18,23 +19,35 @@ public class LogEvents {
 
         long start = System.currentTimeMillis();
 
-        new LogEvents().verifyLogEvents();
-        System.out.println("DONE");
-        //  Runtime.getRuntime().addShutdownHook(new Thread(() -> log.info("SHUTDOWN")));
-        // Thread.currentThread().join();
-        log.info("DONE ");
+        new LogEvents().parallelWrites();
 
         System.out.println((System.currentTimeMillis() - start));
     }
 
-    private static void verifyLogEvents() {
-        log.info("MAIN_PROCESS...");
-        AppUtil.runProcess(VolumeCreator.class);
-        IntStream.range(1, 5).forEach(i -> log.info("BACK_TO_MAIN_PROCESS {}", i));
+    private static void parallelWrites() throws Exception {
+        ExecutorService executorService = Executors.newFixedThreadPool(10);
+        // to demonstrate multiple jobs running in parallel
+        executorService.submit(() -> AppUtil.runProcess(VolumeCreator.class));
+        executorService.submit(() -> AppUtil.runProcess(VolumeCreator.class));
+        executorService.submit(() -> AppUtil.runProcess(VolumeCreator.class));
+        executorService.submit(() -> AppUtil.runProcess(VolumeCreator.class));
+        executorService.submit(() -> AppUtil.runProcess(VolumeCreator.class));
 
-        AppUtil.runProcess(VolumeCreator.class);
-        IntStream.range(1, 5).forEach(i -> log.info("BACK_TO_MAIN_PROCESS {}", i));
-        immediateFlush();
+        executorService.shutdown();
+    }
+
+
+    private static void sequentialWrites() {
+        new Thread(() -> {
+            for (int i = 0; i < 5; i++) {
+                System.out.println(" ->" + i);
+                AppUtil.runProcess(VolumeCreator.class);
+            }
+        }).start();
+        // IntStream.range(1, 5).forEach(i -> log.info("BACK_TO_MAIN_PROCESS {}", i));
+
+        // AppUtil.runProcess(VolumeCreator.class);
+        // IntStream.range(1, 5).forEach(i -> log.info("BACK_TO_MAIN_PROCESS {}", i));
 
     }
 

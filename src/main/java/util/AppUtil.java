@@ -17,17 +17,20 @@ public class AppUtil {
 
     public static void runProcess(Class<? extends Object> className) {
         String javaHome = System.getProperty("java.home");
+        String suid = UUID.randomUUID().toString().substring(1, 8);
         String javaBin = javaHome + File.separator + "bin" + File.separator + "java";
         String classpath = System.getProperty("java.class.path");
 
         List<String> command = new ArrayList<>(6);
         command.add(javaBin);
-        command.add("-Dsuid=888888");
+        command.add("-Dsuid=" + suid);
         command.add("-cp");
         command.add(classpath);
         command.add(className.getName());
         command.add(UUID.randomUUID().toString());
         ProcessBuilder builder = new ProcessBuilder(command);
+        builder.environment().put("fvocid", "thiru");
+        builder.environment().put("suid", suid);
         builder.redirectErrorStream(true);
 
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {

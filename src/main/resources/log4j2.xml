@@ -3,9 +3,9 @@
 <!--
   ~ Copyright (c)  Oracle and/or its affiliates. All rights reserved.
 -->
-<Configuration status="error">
+<Configuration status="error" packages="com.codergists.log.appender">
     <Properties>
-        <Property name="log_base_dir">//Users/tvajjala/Documents/RnD/process-builder</Property><!-- TODO: baseDir -->
+        <Property name="log_base_dir">.</Property><!-- TODO: baseDir -->
         <Property name="log_dir">${log_base_dir}/logs/mv-creator</Property>
         <Property name="json_log_dir">${log_dir}/json</Property>
         <Property name="service_name">test-creator</Property>
@@ -23,21 +23,20 @@
             <PatternLayout pattern="${log_pattern}"/>
         </Console>
         <!-- Standard log file generation -->
-        <RollingFile name="fileAppender"
-                     fileName="${log_dir}/${service_name}.log"
-                     immediateFlush="true"
-
-                     filePattern="${standard_archive}"
-                     ignoreExceptions="false">
+        <ConcurrentLogAppender name="fileAppender"
+                               fileName="${log_dir}/${service_name}.log"
+                               immediateFlush="false"
+                               filePattern="${standard_archive}"
+                               ignoreExceptions="false">
             <PatternLayout pattern="${log_pattern}"/>
             <Policies>
                 <SizeBasedTriggeringPolicy size="${max_log_size}"/>
             </Policies>
             <DefaultRolloverStrategy max="${rollover_max_files}"/>
-        </RollingFile>
+        </ConcurrentLogAppender>
 
         <RollingFile name="jsonLayoutAppender" fileName="${json_log_dir}/${service_name}.json.log"
-                     immediateFlush="true"
+                     immediateFlush="false"
                      filePattern="${json_archive}" ignoreExceptions="false">
 
             <!--
@@ -48,10 +47,10 @@
             -->
 
             <JSONLayout complete="false" compact="true" eventEol="true" properties="true" stacktraceAsString="true"
-                        includeTimeMillis="true">
+                        includeTimeMillis="false">
                 <!-- specify additional attributes required to be populated in json log-->
                 <KeyValuePair key="service" value="${service_name}"/>
-                <KeyValuePair key="hostname" value="${hostName}"/>
+                <KeyValuePair key="suffix" value="${suffix}"/>
             </JSONLayout>
             <Policies>
                 <SizeBasedTriggeringPolicy size="${max_log_size}"/>

@@ -1,6 +1,5 @@
 package org.example;
 
-import org.apache.logging.log4j.LogManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -16,19 +15,22 @@ public class Main {
 
     public static void main(String[] args) {
 
-        MDC.put("pid", String.valueOf(getProcessId()));
+        try {
+            MDC.put("pid", String.valueOf(getProcessId()));
+            log.info("Received req");
+            int j = 0;
+            do {
+                for (int i = 0; i < 10; i++) {
+                    log.info("LOGGING {} {}", i, System.getenv("K"));
+                }
+                log.info("writing to logger {}", j++);
+                //waitForSeconds(1);
+                // log.info("Completed writing {}", i);
+            } while (j < 3000);
 
-        // log.info("Received req");
-        int i = 1;
-
-        do {
-            log.info("writing to logger {}", i++);
-
-            LogManager.shutdown(true);
-            //waitForSeconds(1);
-
-            // log.info("Completed writing {}", i);
-        } while (i < 3000);
+        } catch (Exception e) {
+            System.err.println(e);
+        }
 
     }
 
