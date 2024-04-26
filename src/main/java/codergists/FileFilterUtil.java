@@ -72,8 +72,8 @@ public class FileFilterUtil {
   static void cleanupOldFiles(String... parentDirs) {
     try {
       Stream.of(parentDirs)
-            .map(dir -> new File(dir))
-            .forEach(parentDir -> scanDirectory(parentDir));
+            .map(File::new)
+            .forEach(FileFilterUtil::scanDirectory);
     } catch (Exception exception) {
       exception.printStackTrace();
     }

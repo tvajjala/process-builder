@@ -25,7 +25,7 @@
         <!-- Standard log file generation -->
         <RollingFile name="fileAppender"
                      fileName="${log_dir}/${service_name}.log"
-                     immediateFlush="false"
+                     immediateFlush="true"
 
                      filePattern="${standard_archive}"
                      ignoreExceptions="false">
@@ -37,7 +37,7 @@
         </RollingFile>
 
         <RollingFile name="jsonLayoutAppender" fileName="${json_log_dir}/${service_name}.json.log"
-                     immediateFlush="false"
+                     immediateFlush="true"
                      filePattern="${json_archive}" ignoreExceptions="false">
 
             <!--
