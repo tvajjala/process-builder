@@ -1,69 +1,79 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <!--
   ~ Copyright (c)  Oracle and/or its affiliates. All rights reserved.
 -->
-<Configuration status="error" packages="com.codergists.log.appender">
+<Configuration status="fatal">
     <Properties>
         <Property name="log_base_dir">.</Property><!-- TODO: baseDir -->
         <Property name="log_dir">${log_base_dir}/logs/mv-creator</Property>
         <Property name="json_log_dir">${log_dir}/json</Property>
-        <Property name="service_name">test-creator</Property>
-        <Property name="suffix">${sys:suid:-default}</Property>
-        <Property name="standard_archive">${log_dir}/${service_name}-%d{yyyy-MM-dd-HH}_%i.log.gz</Property>
+        <Property name="service_name">mv-creator</Property>
+        <Property name="log_subdir">${sys:sessionId:-default}</Property>
+        <!-- read sessionId as system property, if not present use default -->
+        <Property name="standard_archive">${log_dir}/${log_subdir}/${service_name}-%d{yyyy-MM-dd-HH}_%i.log.gz
+        </Property>
         <Property name="json_archive">${json_log_dir}/${service_name}-%d{yyyy-MM-dd-HH}_%i.json.log.gz</Property>
-        <Property name="log_pattern">%m%n</Property>
+        <Property name="log_pattern">%d{yyyy-MM-dd HH:mm:ss}[%5X{nsid}] [%5X{pid}] %-5p %c{1}:%L - %m%n</Property>
         <!-- General properties for log rotation -->
-        <Property name="max_log_size">300 KB</Property>
-        <Property name="rollover_max_files">50</Property>
+        <Property name="max_log_size">5 MB</Property>
+        <Property name="rollover_max_files">10</Property>
     </Properties>
     <Appenders>
 
         <Console name="CONSOLE" target="SYSTEM_OUT" follow="true">
             <PatternLayout pattern="${log_pattern}"/>
         </Console>
+
         <!-- Standard log file generation -->
-        <ConcurrentLogAppender name="fileAppender"
-                               fileName="${log_dir}/${service_name}.log"
-                               immediateFlush="false"
-                               filePattern="${standard_archive}"
-                               ignoreExceptions="false">
+        <RollingFile name="fileAppender" fileName="${log_dir}/${log_subdir}/${service_name}.log"
+                     filePattern="${standard_archive}" ignoreExceptions="false">
             <PatternLayout pattern="${log_pattern}"/>
             <Policies>
                 <SizeBasedTriggeringPolicy size="${max_log_size}"/>
             </Policies>
             <DefaultRolloverStrategy max="${rollover_max_files}"/>
-        </ConcurrentLogAppender>
+        </RollingFile>
 
-        <RollingFile name="jsonLayoutAppender" fileName="${json_log_dir}/${service_name}.json.log"
-                     immediateFlush="false"
-                     filePattern="${json_archive}" ignoreExceptions="false">
 
+        <!-- JSONTemplate based log generation
+         https://logging.apache.org/log4j/2.x/manual/json-template-layout.html
+         -->
+        <ConcurrentProcessAppender name="jsonTemplateLayoutAppender" fileName="${json_log_dir}/${service_name}.json.log"
+                                   filePattern="${json_archive}" ignoreExceptions="false" bufferSize="128">
             <!--
-             complete - If complete="false", the appender does not write the JSON open array character "[" at the start of the document, "]" and the end, nor comma "," between records.
-             compact  - If compact="true", then no end-of-line or indentation is used, which will cause the output to take less space.
-             eventEol - If true, the appender appends an end-of-line after each record
-             includeTimeMillis - If true, the timeMillis attribute is included in the Json payload instead of the instant
+             maxStringLength - truncate string values longer than the specified limit (defaults to 16384)
+             eventTemplateUri - customize json log file attributes.
             -->
-
-            <JSONLayout complete="false" compact="true" eventEol="true" properties="true" stacktraceAsString="true"
-                        includeTimeMillis="false">
-                <!-- specify additional attributes required to be populated in json log-->
-                <KeyValuePair key="service" value="${service_name}"/>
-                <KeyValuePair key="suffix" value="${suffix}"/>
-            </JSONLayout>
+            <JsonTemplateLayout eventTemplateUri="classpath:jsonTemplateLayout.json" maxStringLength="916384">
+                <EventTemplateAdditionalField key="service" value="${service_name}"/>
+                <EventTemplateAdditionalField key="hostname" value="${hostName}"/>
+            </JsonTemplateLayout>
             <Policies>
                 <SizeBasedTriggeringPolicy size="${max_log_size}"/>
             </Policies>
             <DefaultRolloverStrategy max="${rollover_max_files}"/>
+        </ConcurrentProcessAppender>
+
+        <!--This can only contain log configuration errors -->
+        <RollingFile name="exceptionHandlerAppender" fileName="${log_dir}/${log_subdir}/errors.log"
+                     filePattern="${standard_archive}" ignoreExceptions="false">
+            <PatternLayout pattern="${log_pattern}"/>
+            <TimeBasedTriggeringPolicy/>
         </RollingFile>
+
+        <Failover name="errorHandlerJsonAppender" primary="jsonTemplateLayoutAppender">
+            <Failovers>
+                <AppenderRef ref="exceptionHandlerAppender"/>
+            </Failovers>
+        </Failover>
+
     </Appenders>
 
     <Loggers>
         <Root level="info" additivity="false">
             <AppenderRef ref="fileAppender"/>
-            <AppenderRef ref="jsonLayoutAppender"/>
-            <!--   <AppenderRef ref="CONSOLE"/>-->
+            <AppenderRef ref="errorHandlerJsonAppender"/>
+            <!--<AppenderRef ref="CONSOLE"/>-->
         </Root>
     </Loggers>
 </Configuration>
