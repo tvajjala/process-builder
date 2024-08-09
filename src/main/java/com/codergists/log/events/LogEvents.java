@@ -22,7 +22,7 @@ public class LogEvents {
         //System.out.println((System.currentTimeMillis() - start));
     }
 
-    private static void parallelWrites() {
+    private  void parallelWrites() {
         ExecutorService executorService = Executors.newFixedThreadPool(10);
         // to demonstrate multiple jobs running in parallel
         executorService.submit(() -> AppUtil.runProcess(VolumeCreator.class));

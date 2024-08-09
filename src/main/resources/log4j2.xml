@@ -75,5 +75,8 @@
             <AppenderRef ref="errorHandlerJsonAppender"/>
             <!--<AppenderRef ref="CONSOLE"/>-->
         </Root>
+
+
     </Loggers>
+
 </Configuration>

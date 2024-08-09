@@ -109,8 +109,8 @@ public class ConcurrentProcessAppender extends AbstractOutputStreamAppender<Roll
             manager.initialize();
 
             return new ConcurrentProcessAppender(getName(), layout, getFilter(),
-                    false,
-                    false,
+                    true,
+                    true,
                     getPropertyArray(),
                     manager, fileName, filePattern);
         }
