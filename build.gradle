@@ -11,9 +11,9 @@ repositories {
 
 dependencies {
     annotationProcessor("org.apache.logging.log4j:log4j-core:${log4jVersion}")
-    implementation "com.oracle.oci.sdk:oci-java-sdk-core:2.11.1"
+    implementation "com.oracle.oci.sdk:oci-java-sdk-core:3.42.0"
     implementation "com.oracle.oci.sdk:oci-java-sdk-secrets:2.11.1"
-    implementation group: 'com.github.seancfoley', name: 'ipaddress', version: '2.0.1'
+    implementation group: 'com.github.seancfoley', name: 'ipaddress', version: '5.4.1'
 
     implementation "commons-io:commons-io:2.11.0"
 
