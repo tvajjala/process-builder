@@ -34,9 +34,9 @@ public class ProcessDemo {
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream(); ByteArrayOutputStream errStream = new ByteArrayOutputStream()) {
             Process process = builder.start();
             new OutputThread(process.getErrorStream(), "ERR", errStream).start();
-            new OutputThread(process.getErrorStream(), "OUT", outputStream).start();
+            new OutputThread(process.getInputStream(), "OUT", outputStream).start();
             int exitCode = process.waitFor();
-            String err = new String(errStream.toByteArray());
+            String err = errStream.toString();
             String output = new String(outputStream.toByteArray());
             System.out.println(output);
 
@@ -87,6 +87,7 @@ class OutputThread extends Thread {
         } catch (IOException ioe) {
             ioe.printStackTrace();
         }
+
     }
 
 }

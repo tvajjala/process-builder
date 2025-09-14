@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Iterator;
 
 /**
+ * <a href="https://www.davidc.net/sites/default/subnets/subnets.html">...</a>
  * @author tvajjala
  */
 public class CidrBlockBuilderTest {

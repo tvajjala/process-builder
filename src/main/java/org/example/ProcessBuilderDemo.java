@@ -1,8 +1,8 @@
 package org.example;
 
-import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.AppUtil;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -64,14 +64,14 @@ public class ProcessBuilderDemo {
         command.add(UUID.randomUUID().toString());
         ProcessBuilder builder = new ProcessBuilder(command);
         builder.redirectErrorStream(true);
-        builder.environment().putAll(ImmutableMap.of("K", "V"));
+        //builder.environment().putAll(ImmutableMap.of("K", "V"));
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream(); ByteArrayOutputStream errStream = new ByteArrayOutputStream()) {
             Process process = builder.start();
             new OutputThread(process.getErrorStream(), "ERR", errStream).start();
             new OutputThread(process.getErrorStream(), "OUT", outputStream).start();
             int exitCode = process.waitFor();
-            String err = new String(errStream.toByteArray());
-            String output = new String(outputStream.toByteArray());
+            String err = errStream.toString();
+            String output = outputStream.toString();
             log.info("Child process output: {}", output);
 
             log.info("ERROR {}", err);
@@ -88,18 +88,7 @@ public class ProcessBuilderDemo {
 
     static String parseStream(final InputStream inputStream) {
 
-        final StringBuilder stringBuilder = new StringBuilder();
-
-        try (final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                stringBuilder.append(line);
-                stringBuilder.append("\n");
-            }
-            return stringBuilder.toString().trim();// to remove lead/tail new lines
-        } catch (final IOException ioException) {
-            throw new RuntimeException("Unable to read the stream", ioException);
-        }
+        return AppUtil.parseStream(inputStream);
 
     }
 }

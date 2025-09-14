@@ -92,7 +92,9 @@ public class FileFilterUtil {
    * @param args list of directories
    */
   public static void main(String[] args) {
-    cleanupOldFiles(args);
+
+    //cleanupOldFiles(args);
+
   }
 
 }
